@@ -1,5 +1,5 @@
 import mysql from "mysql2/promise";
-
+import axios from 'axios';
 const dbConnection = mysql.createPool({
   host: "43.204.113.12",
   user: "vw-srv-0001",
@@ -10,7 +10,7 @@ const dbConnection = mysql.createPool({
 
 export const lambdaHandler = async (event, context) => {
   try {
-    const reports = JSON.parse(event.body).results;
+    const reports = JSON.parse(event.body).results;                                                                                                                                                                                                                                                                                                                                                 
     console.log("Hello");
 
     // Loop through each report
@@ -23,12 +23,12 @@ export const lambdaHandler = async (event, context) => {
       date1.setHours(date1.getHours() + 5);
       date1.setMinutes(date1.getMinutes() + 30);
 
-      const updatedTimeString = date1.toISOString();
+      const updatedTimeString = date1.toISOString();                                                                                            
       let date = updatedTimeString.slice(0, -4);
       date = date.replace("T", " ");
       console.log("id", id);
 
-      // // Manpower data insertion
+    //   // // Manpower data insertion
       const { techTeam, horticulture, houseKeeping, security, pwdCctvOp } =
         jsondata;
       const teamsArray = [
@@ -76,7 +76,7 @@ export const lambdaHandler = async (event, context) => {
         )
       );
 
-      // // Electricity usage data insertion
+    //   // // Electricity usage data insertion
 
       const {
         substationMeterE1,
@@ -177,7 +177,7 @@ export const lambdaHandler = async (event, context) => {
       ];
       console.log(usageByMeters);
 
-      // // // Fetch previous day's data for a given meter
+    //   // // // Fetch previous day's data for a given meter
       async function fetchPreviousDayData(meterName, currentDate) {
         const previousDayValuesQuery = `
           SELECT presentKvah, presentKwh
@@ -230,7 +230,7 @@ export const lambdaHandler = async (event, context) => {
         })
       );
 
-      //   // // Water Usage Processing
+    //   //   // // Water Usage Processing
 
       async function fetchPreviousDayFinalReading(tankType, currentDate) {
         const previousDayFinalReadingQuery = `
@@ -299,9 +299,9 @@ export const lambdaHandler = async (event, context) => {
           ]);
         })
       );
-      //   //   //Diesel Usage
+    //   //   //   //Diesel Usage
 
-      //   //   // HSD STOCK
+    //   //   //   // HSD STOCK
       const { hsdStock } = jsondata;
 
       const hsdStockObj = {
@@ -338,7 +338,7 @@ export const lambdaHandler = async (event, context) => {
         hsdStockObj.dgOpeningBalance250KVA,
       ]);
 
-      //   //   // //dg status
+    //   //   //   // //dg status
 
       const { dgStatus } = jsondata;
 
@@ -398,7 +398,7 @@ export const lambdaHandler = async (event, context) => {
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
       `;
 
-      // Execute the insertion query
+    //   // Execute the insertion query
       await dbConnection.execute(dgStatusQuery, [
         dgStatusObject.id,
         dgStatusObject.previousDG250KVA,
@@ -410,7 +410,7 @@ export const lambdaHandler = async (event, context) => {
         dgStatusObject.date,
       ]);
 
-      //   // //   // //DG B Check
+    //   //   // //   // //DG B Check
 
       const { dgBCheck } = jsondata;
 
@@ -435,7 +435,7 @@ export const lambdaHandler = async (event, context) => {
         dgBCheckObj.date,
       ]);
 
-      //   //   // //STP Report
+    //   //   //   // //STP Report
 
       const { kld65, kld90 } = jsondata;
 
@@ -492,7 +492,7 @@ export const lambdaHandler = async (event, context) => {
         )
       );
 
-      //  //CCTV  Status
+    //   //  //CCTV  Status
 
       const {
         cctv1Status,
@@ -607,7 +607,7 @@ export const lambdaHandler = async (event, context) => {
           date: date.slice(0, -1),
         },
       ];
-      //   console.log(cctvDetailsArray)
+        console.log(cctvDetailsArray)
 
       const cctvQuery = `INSERT INTO cctv (id, cctv, cctvStatus, date, reason) VALUES (?,?,?,?,?)`;
 
@@ -623,7 +623,7 @@ export const lambdaHandler = async (event, context) => {
         )
       );
 
-      //   //   // //UPS STATUS
+    //   //   //   // //UPS STATUS
       const { upsStatus } = jsondata;
       const { rating, maxLoad, batteryVoltage, serviceDate } = upsStatus;
 
@@ -648,7 +648,7 @@ export const lambdaHandler = async (event, context) => {
         upsObject.date,
       ]);
 
-      //   //   // // Ground Water Tank Status
+    //   //   //   // // Ground Water Tank Status
 
       const { statusPercentage1, statusPercentage2, statusPercentage3 } =
         jsondata;
@@ -687,7 +687,7 @@ export const lambdaHandler = async (event, context) => {
         )
       );
 
-      //   //   // //Critical Equipment
+    //   //   //   // //Critical Equipment
 
       const { transformer, ups, dg, remarks1, remarks2, remarks3 } = jsondata;
 
@@ -730,7 +730,7 @@ export const lambdaHandler = async (event, context) => {
         )
       );
 
-      //   //   //Breakdown Status
+    //   //   //   //Breakdown Status
 
       const { breakdownStatus } = jsondata;
 
@@ -769,7 +769,7 @@ export const lambdaHandler = async (event, context) => {
         ]);
       }
 
-      //   // //   //Activity Status
+    ///Activity Status
 
       const { activityDetails, activityDate } = jsondata;
 
@@ -798,14 +798,25 @@ export const lambdaHandler = async (event, context) => {
         activityObj.activityDate,
       ]);
     }
+    const testEndpoint="https://cfv6errmz6.execute-api.ap-south-1.amazonaws.com/Prod/testData"
 
+       const testResponse = await axios.post(testEndpoint, event.body, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      console.log('Test Lambda Response:', testResponse.data);
+    
     return {
       statusCode: 200,
       headers: {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Credentials": true,
       },
-      body: JSON.stringify({ message: "Data inserted successfully" }),
+      body: JSON.stringify({
+        message: 'Data inserted into production and test databases successfully!',
+      }),
     };
   } catch (error) {
     console.error("Error:", error);
